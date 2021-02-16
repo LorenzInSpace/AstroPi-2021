@@ -48,31 +48,34 @@ def setMetadata(lat, long):
     camera.exif_tags['GPS.GPSLongitudeRef'] = "W" if west else "E"
 
 
+
+
 def calculteBrightness(image):
     #calculate the brightness off an image
     #return value: 0 for dark image, 255 for bright image
     try:
         greyscale_image = image.convert('L')
-        colors = greyscale_image.getcolors()
-        print(colors)
+        hw,hh = greyscale_image.size[0]/2, greyscale_image.size[1]/2
+        r = min(hw,hh)/8
         mean = 0
-        pixelNumber = 0
-        for count, color in colors:
-            mean += color*count
-            pixelNumber += count
-        mean /= pixelNumber
+        delta_theta = 2* math.pi / 8
+        # we are sampling 8 pixel for 4 rings around the center of the image to check the brightness without wasting memory or time
+        for i in range(32):
+            theta = (i%8)*delta_theta
+            l = r*(i//8+1)
+            mean += greyscale_image.getpixel((int(hw+l*math.sin(theta)),int(hh+l*math.cos(theta))))
+        mean/=32
         return mean
     except Exception as e:
         logger.error('{}: {})'.format(e.__class__.__name__,e))
         return None
 
-
 sense = SenseHat()
 # this TLE data are needed for computing ISS coordinates using ephem module
 # IMPORTANT: make sure this data are updated to last version here -> http://www.celestrak.com/NORAD/elements/stations.txt
-name = "ISS (ZARYA)"
-line1 = "1 25544U 98067A   21008.41078817  .00001907  00000-0  42360-4 0  9993"
-line2 = "2 25544  51.6453  53.0183 0000571 194.6399 179.4598 15.49269883263830"
+name="ISS (ZARYA)"
+line1 = "1 25544U 98067A   21047.51651748  .00000569  00000-0  18502-4 0  9991"
+line2 = "2 25544  51.6430 219.5729 0002764  22.9843  51.4385 15.48965798269895"
 
 iss = readtle(name,line1,line2)
 
@@ -105,11 +108,10 @@ while(start_time + timedelta(minutes=1) > datetime.now() ):
             add_csv_data(data_file, row)
             image = Image.open(str(dir_path)+"/image_{0:0=3d}.jpg".format(rowCounter+1))
             brightness = calculteBrightness(image)
-            if(brightness != None and brightness < 30 ):
+            if(brightness != None and brightness < 65 ):
                 os.remove(str(dir_path)+"/image_{0:0=3d}.jpg".format(rowCounter+1))
             image.close()
             rowCounter+=1
     except Exception as e:
         logger.error('{}: {})'.format(e.__class__.__name__,e))
     iterationCounter+=1
-    #sleep(60) sleep function should not be used when gathering data from sensehat
