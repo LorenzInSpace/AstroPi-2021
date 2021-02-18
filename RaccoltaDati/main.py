@@ -94,8 +94,10 @@ start_time = datetime.now()
 last_catch = datetime.now()
 iterationCounter = 0
 rowCounter = 0
-while(start_time + timedelta(minutes=1) > datetime.now() ):
+while(start_time + timedelta(minutes=180) > datetime.now() ):
     try:
+        #body of the code. each 10 seconds gather geographic coordinates and orientation data and store them.
+        #if there is enough light save the photo, otherwise delete it to save memory
         logger.info("{} iteration {} {}".format(datetime.now(),iterationCounter, rowCounter))
         if(last_catch+timedelta(seconds=10) < datetime.now() ):
             iss.compute() # compute lat/long data
