@@ -9,6 +9,8 @@ from ephem import readtle, degree
 from picamera import PiCamera
 from PIL import Image
 import os
+import math
+
 
 #create a CSV file, and write headers on top of it
 def create_csv(file):
@@ -53,35 +55,34 @@ def setMetadata(lat, long):
 def calculteBrightness(image):
     #calculate the brightness off an image
     #return value: 0 for dark image, 255 for bright image
-    try:
-        greyscale_image = image.convert('L')
-        hw,hh = greyscale_image.size[0]/2, greyscale_image.size[1]/2
-        r = min(hw,hh)/8
-        mean = 0
-        delta_theta = 2* math.pi / 8
-        # we are sampling 8 pixel for 4 rings around the center of the image to check the brightness without wasting memory or time
-        for i in range(32):
-            theta = (i%8)*delta_theta
-            l = r*(i//8+1)
-            mean += greyscale_image.getpixel((int(hw+l*math.sin(theta)),int(hh+l*math.cos(theta))))
-        mean/=32
-        return mean
-    except Exception as e:
-        logger.error('{}: {})'.format(e.__class__.__name__,e))
-        return None
+
+    greyscale_image = image.convert('L')
+    hw,hh = greyscale_image.size[0]/2, greyscale_image.size[1]/2
+    r = min(hw,hh)/8
+    mean = 0
+    delta_theta = 2* math.pi / 8
+    # we are sampling 8 pixel for 4 rings around the center of the image to check the brightness without wasting memory or time
+    for i in range(32):
+        theta = (i%8)*delta_theta
+        l = r*(i//8+1)
+        mean += greyscale_image.getpixel((int(hw+l*math.sin(theta)),int(hh+l*math.cos(theta))))
+    mean/=32
+    return mean
+
 
 sense = SenseHat()
 # this TLE data are needed for computing ISS coordinates using ephem module
 # IMPORTANT: make sure this data are updated to last version here -> http://www.celestrak.com/NORAD/elements/stations.txt
 name="ISS (ZARYA)"
-line1 = "1 25544U 98067A   21047.51651748  .00000569  00000-0  18502-4 0  9991"
-line2 = "2 25544  51.6430 219.5729 0002764  22.9843  51.4385 15.48965798269895"
+line1 = "1 25544U 98067A   21049.73010417  .00001295  00000-0  31684-4 0  9992"
+line2 = "2 25544  51.6438 208.6238 0003101  30.2592 155.9152 15.48974654270239"
 
 iss = readtle(name,line1,line2)
 
 #set up camera
 camera = PiCamera()
-camera.resolution = (1296,972) # TODO: check if this is the best resolution
+#camera.resolution = (1296,972)
+camera.resolution = (2000,1500)
 
 # get the path of some usefull files
 dir_path = Path(__file__).parent.resolve()
@@ -95,69 +96,54 @@ last_catch = datetime.now()
 iterationCounter = 0
 PhotoCounter = 0
 BrightnessArray = []
-min = 257
+min_ = 257
 while(start_time + timedelta(minutes=180) > datetime.now() ):
     try:
         """
         We save a bare minimum of 1000 images to be sure we have enough data, then we only save data that improves the brightness score of our dataset.
         """
-        logger.info("{} iteration {}".format(datetime.now(),iterationCounter))
-        if(last_catch+timedelta(seconds=7.5) < datetime.now() ):
+        #logger.info("{} iteration {}".format(datetime.now(),iterationCounter))
+        if(last_catch+timedelta(seconds=2) < datetime.now() ):
             iss.compute() # compute lat/long data
             latitude, longitude = iss.sublat, iss.sublong
             orientation = sense.get_orientation()
             setMetadata(latitude ,longitude)
             if PhotoCounter < 1000:
-              camera.capture(str(dir_path)+"/image_{0:0=3d}.jpg".format(PhotoCounter)) # takes a photo and gives the file an indexed name
-              last_catch = datetime.now()
-              row = (last_catch, latitude/degree, longitude/degree, orientation['roll'], orientation['pitch'], orientation['yaw'], PhotoCounter)
-              add_csv_data(data_file, row)
-              # evaluate brightness of the picture and append the value to BrightnessArray
-              with Image.open(str(dir_path)+"/image_{0:0=3d}.jpg".format(PhotoCounter)) as image:
-                brightness = calculteBrightness(image)
-              BrightnessArray.append(brightness)
-              if brightness < min:
-                min = brightness
-              PhotoCounter += 1
-            else:
-              camera.capture(str(dir_path)+"/temp.jpg")
-              last_catch = datetime.now()
-              with Image.open(str(dir_path)+"/temp.jpg") as image:
-                brightness = calculteBrightness(image)
-              if brightness > min:
-                i = 0
-                for b in BrightnessArray:
-                  if b == min:
-                    break
-                  i+=1
-                # substitute the darkest image with the new brighter one
-                BrightnessArray[i]=brightness
-                os.remove(str(dir_path)+"/image_{0:0=3d}.jpg".format(i))
-                os.rename(str(dir_path)+"/temp.jpg", str(dir_path)+"/image_{0:0=3d}.jpg".format(i)))
-                row = (last_catch, latitude/degree, longitude/degree, orientation['roll'], orientation['pitch'], orientation['yaw'], i)
+                camera.capture(str(dir_path)+"/image_{0:0=3d}.jpg".format(PhotoCounter)) # takes a photo and gives the file an indexed name
+                print("/image_{0:0=3d}.jpg".format(PhotoCounter))
+                last_catch = datetime.now()
+                row = (last_catch, latitude/degree, longitude/degree, orientation['roll'], orientation['pitch'], orientation['yaw'], PhotoCounter)
                 add_csv_data(data_file, row)
-                min = brightness
-              else:
-                os.remove(str(dir_path)+"/temp.jpg")
-                
-            """
-            
-            iss.compute() # compute lat/long data
-            latitude, longitude = iss.sublat, iss.sublong
-            orientation = sense.get_orientation()
-            row = (datetime.now(), latitude/degree, longitude/degree, orientation['roll'], orientation['pitch'], orientation['yaw'])
-            
-            setMetadata(latitude ,longitude)
-            camera.capture(str(dir_path)+"/image_{0:0=3d}.jpg".format(rowCounter+1)) #this line shot a photo and give the file a numeric unique name
-            last_catch = datetime.now()
-            add_csv_data(data_file, row)
-            image = Image.open(str(dir_path)+"/image_{0:0=3d}.jpg".format(rowCounter+1))
-            brightness = calculteBrightness(image)
-            if(brightness != None and brightness < 65 ):
-                os.remove(str(dir_path)+"/image_{0:0=3d}.jpg".format(rowCounter+1))
-            image.close()
-            rowCounter+=1
-            """
+                # evaluate brightness of the picture and append the value to BrightnessArray
+                with Image.open(str(dir_path)+"/image_{0:0=3d}.jpg".format(PhotoCounter)) as image:
+                    brightness = calculteBrightness(image)
+                BrightnessArray.append(brightness)
+                if brightness < min_:
+                    min_ = brightness
+                PhotoCounter += 1
+            else:
+                camera.capture(str(dir_path)+"/temp.jpg")
+                last_catch = datetime.now()
+                with Image.open(str(dir_path)+"/temp.jpg") as image:
+                    brightness = calculteBrightness(image)
+                if brightness > min_:
+                    i = 0
+                    for b in BrightnessArray:
+                        if b == min_:
+                            break
+                        i+=1
+                    # substitute the darkest image with the new brighter one
+                    BrightnessArray[i]=brightness
+                    print("{}: {} -> {}".format(i,min_, brightness))
+                    print(BrightnessArray)
+                    os.remove(str(dir_path)+"/image_{0:0=3d}.jpg".format(i))
+                    os.rename(str(dir_path)+"/temp.jpg", str(dir_path)+"/image_{0:0=3d}.jpg".format(i))
+                    row = (last_catch, latitude/degree, longitude/degree, orientation['roll'], orientation['pitch'], orientation['yaw'], i)
+                    add_csv_data(data_file, row)
+                    min_ = min(BrightnessArray)
+                else:
+                    os.remove(str(dir_path)+"/temp.jpg")
+
     except Exception as e:
         logger.error('{}: {})'.format(e.__class__.__name__,e))
     iterationCounter+=1
