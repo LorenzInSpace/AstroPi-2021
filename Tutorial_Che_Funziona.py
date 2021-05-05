@@ -41,8 +41,8 @@ class NeuralNetwork(nn.Module):
         super(NeuralNetwork, self).__init__()
         self.flatten = nn.Flatten()
         self.linear_relu_stack = nn.Sequential(
-            nn.Linear(28*28, 512),
-            nn.ReLU(),
+            nn.Linear(28*28, 512), # strati, dati input - output
+            nn.ReLU(), # funzione sigmoide, rectified linear unit
             nn.Linear(512, 512),
             nn.ReLU(),
             nn.Linear(512, 10),
@@ -50,17 +50,17 @@ class NeuralNetwork(nn.Module):
         )
 
     def forward(self, x):
-        x = self.flatten(x)
+        x = self.flatten(x) # trasforma matrice in un array
         logits = self.linear_relu_stack(x)
         return logits
 
-model = NeuralNetwork().to(device)
+model = NeuralNetwork().to(device) # device è o cpu o gpu
 print(model)
 
 
-loss_fn = nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
-
+loss_fn = nn.CrossEntropyLoss() # per capire quanto sbaglia rispetto alla risposta giusta.
+optimizer = torch.optim.SGD(model.parameters(), lr=1e-3) # Implements stochastic gradient descent
+                                                #learning rate
 
 
 def train(dataloader, model, loss_fn, optimizer):
@@ -70,12 +70,12 @@ def train(dataloader, model, loss_fn, optimizer):
 
         # Compute prediction error
         pred = model(X)
-        loss = loss_fn(pred, y)
+        loss = loss_fn(pred, y) # differenza rispetto a quello che doveva essere
 
         # Backpropagation
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+        optimizer.zero_grad() # resetta
+        loss.backward() # calcola la derivata del costo rispetto alle x
+        optimizer.step() # fa step
 
         if batch % 100 == 0:
             loss, current = loss.item(), batch * len(X)
@@ -87,11 +87,15 @@ def test(dataloader, model):
     size = len(dataloader.dataset)
     model.eval()
     test_loss, correct = 0, 0
-    with torch.no_grad():
+    with torch.no_grad(): # azzera il gradiente del blocco di codice, riduce i consumi di memoria
         for X, y in dataloader:
             X, y = X.to(device), y.to(device)
             pred = model(X)
             test_loss += loss_fn(pred, y).item()
+            # prendi i nodo piu acceso, se è uguale a y allora aggiungi 1 al numero di corretti.
+            print("pred arg max:",pred.argmax(1))
+            print("y:",y )
+            print("DEBUG:",pred.argmax(1) == y)
             correct += (pred.argmax(1) == y).type(torch.float).sum().item()
     test_loss /= size
     correct /= size
@@ -109,8 +113,7 @@ print("Done!")
 #torch.save(model.state_dict(), "model.pth")
 #print("Saved PyTorch Model State to model.pth")
 
-#model = NeuralNetwork()
-#model.load_state_dict(torch.load("model.pth"))
+
 
 classes = [
     "T-shirt/top",
@@ -131,4 +134,3 @@ with torch.no_grad():
     pred = model(x)
     predicted, actual = classes[pred[0].argmax(0)], classes[y]
     print(f'Predicted: "{predicted}", Actual: "{actual}"')
-
