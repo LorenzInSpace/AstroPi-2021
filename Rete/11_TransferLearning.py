@@ -10,9 +10,11 @@ import time
 import os
 import copy
 
+# Si passa al Transfer Learning, ovvero si importano delle neural network già fatte e già ottimizzate, e si aggiornano soltanto alcuni dei layer (fine tuning), in questo modo si risparmia un sacco di tempo
+# per l'allenamento. Vi avverto ci ho messo mezz'ora per far girare il tutto, ho un Intel i7 da 3.4 GHz. Il dataset sono circa 600 immagini di varie dimensioni e quindi per scaricarlo dovete usare questo link:
+#https://www.youtube.com/redirect?event=video_description&redir_token=QUFFLUhqbU1vVmp2TVZVM2hQUjBmdDBualZkMVJGWDBYQXxBQ3Jtc0ttclE2LUdmci1KdTlIR1ZyNl9QTUZwTU1yTDk2Y0Q2UVFNY2pZenRLTHV6YTJLT2d0NWVKTk1sazRWTjZEVjVhTU5VUGNGMUNqZkFLQlBvYkpucDVreVd0SVpRbXJMUG4yekJEOFV1Slc4VDVfNE5NRQ&q=https%3A%2F%2Fdownload.pytorch.org%2Ftutorial%2Fhymenoptera_data.zip
 
-
-
+# Si dichiarano le trasformate per il dataset, mean e std sono dei parametri che servono per definirle
 mean = np.array([0.5, 0.5, 0.5])
 std = np.array([0.25, 0.25, 0.25])
 
@@ -31,6 +33,7 @@ data_transforms = {
     ]),
 }
 
+# Creazione del dataset, si usa la cartella hymenoptera_data, quella scaricata dal link
 data_dir = 'hymenoptera_data'
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                           data_transforms[x])
