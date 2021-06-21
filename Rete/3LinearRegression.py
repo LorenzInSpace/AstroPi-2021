@@ -21,6 +21,7 @@ n_samples, n_features = X.shape
 # 1) model
 input_size = n_features
 output_size = 1
+#crea un modello di regressione lineare (in pratica una funzione lineare)
 model = nn.Linear(input_size, output_size)
 
 # 2) loss and optimizer
