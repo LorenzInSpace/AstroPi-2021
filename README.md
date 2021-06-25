@@ -8,5 +8,5 @@ We are a team of high school students at the end of our schooling at _applied sc
 Our project consisted in developing a neural network able to determine how much rain has fallen in one day on a specific region given only a picture.
 
 ## Important files
-* neuralNetwork.py : contains the actual neural network that does the magic
-* salvapioggia.js : google earth engine script to recover precipitations data
+* [neuralNetwork.py](https://github.com/LorenzInSpace/AstroPi-2021/blob/main/neuralNetwork.py) : contains the actual neural network that does the magic
+* [salvapioggia.js](https://github.com/LorenzInSpace/AstroPi-2021/blob/main/salvapioggia.js) : google earth engine script to recover precipitations data
