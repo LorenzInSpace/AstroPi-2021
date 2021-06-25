@@ -73,7 +73,7 @@ class ConvNet(nn.Module):
         self.fc3 = nn.Linear(84, 1)
 
     def forward(self, x):
-        # Describes the order of operations
+        # Describes the order of operations, relu is used to render this a Nonlinear system
         x = self.pool1(F.relu(self.conv1(x)))
         x = self.pool1(F.relu(self.conv2(x)))
         x = self.pool2(F.relu(self.conv3(x)))
