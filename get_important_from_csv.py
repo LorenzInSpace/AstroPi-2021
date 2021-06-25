@@ -49,7 +49,7 @@ bad = [1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009,
        1325, 1326, 1327, 1328, 1329, 1330, 1331, 1332, 1333, 1334,
        1335, 1336, 1337, 1338, 1339]
 
-# 1066 is the first valid image of the older ones we had
+# 1066 is the first valid image of the second batch we used
 pioggia = []
 valid = 0
 # Read output from earth engine
