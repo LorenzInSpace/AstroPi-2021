@@ -72,7 +72,7 @@ print(example_data.shape)
 #plt.show()
 img_grid = torchvision.utils.make_grid(example_data)
 print(img_grid.shape)
-#writer.add_image('ISS_images',img_grid)
+writer.add_image('ISS_images',img_grid)
 #writer.close()
 #sys.exit()
 
@@ -116,7 +116,7 @@ model = ConvNet().to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate) # Stavolta usa SGD, non so perché non ADAM
 criterion = nn.MSELoss()
 
-#writer.add_graph(model, example_data)
+writer.add_graph(model, example_data)
 #writer.close()
 #sys.exit()
 n_total_steps = len(train_loader)
@@ -141,8 +141,8 @@ for epoch in range(num_epochs):
         running_loss = loss.item()
         if(i+1) % 10 == 0:
              print(f'Epoch {epoch+1}/{num_epochs}, Step [{i+1}/{len(train_loader)}], Loss: {loss.item():.4f}')
-             #writer.add_scalar('training loss', running_loss / 100, epoch * n_total_steps + i)
-             #running_loss = 0
+             writer.add_scalar('training loss', running_loss / 100, epoch * n_total_steps + i)
+             running_loss = 0
 
 print('Finished Training')
 
