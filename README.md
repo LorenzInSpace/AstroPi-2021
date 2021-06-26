@@ -10,3 +10,4 @@ Our project consisted in developing a neural network able to determine how much 
 ## Important files
 * [neuralNetwork.py](https://github.com/LorenzInSpace/AstroPi-2021/blob/main/neuralNetwork.py) : contains the actual neural network that does the magic
 * [salvapioggia.js](https://github.com/LorenzInSpace/AstroPi-2021/blob/main/salvapioggia.js) : google earth engine script to recover precipitation data
+* [salvapioggia.js](https://github.com/LorenzInSpace/AstroPi-2021/blob/main/utilityScript.py) : collection of three python scripts we used to generate and modify csv and image files
