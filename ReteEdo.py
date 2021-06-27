@@ -11,13 +11,6 @@ from torch.utils.data import (
     Dataset,
     DataLoader,
 )
-import matplotlib.pyplot as plt
-import sys
-
-# per farlo funzionare prima dovete installare tensorboard, scrivere poi sul prompt: "tensorboard --logdir=runs", successivamente dovrebbe dirvi che ha creato un localhost a una certa porta, la mia è 6006. Accedete col browser e dovrebbe mostrarvi
-# tensorboard. A quel punto fate partire il programma
-from torch.utils.tensorboard import SummaryWriter
-writer = SummaryWriter("runs/Project5")
 
 # Define the dataset class
 class Astropi(Dataset):
@@ -61,26 +54,6 @@ train_set, test_set = torch.utils.data.random_split(dataset, [568, 150])
 train_loader = DataLoader(dataset=train_set, batch_size=batch_size, shuffle=True)
 test_loader = DataLoader(dataset=test_set, batch_size=batch_size, shuffle=True)
 
-"""
-examples = iter(test_loader)
-example_data, example_targets = examples.next()
-
-prova = example_data.permute(1,0,2,3)
-prova = prova[0]
-print(prova.shape)
-print(example_data.shape)
-# for i in range(6):
-#     plt.subplot(2,3, i+1)
-#     image = example_data[i].permute(1,2,0)
-#     plt.imshow(image)
-#plt.show()
-img_grid = torchvision.utils.make_grid(example_data)
-print(img_grid.shape)
-writer.add_image('ISS_images',img_grid)
-#writer.close()
-#sys.exit()
-"""
-
 # Defines the network structure
 class ConvNet(nn.Module):
     def __init__(self):
@@ -111,7 +84,6 @@ class ConvNet(nn.Module):
         x = self.fc3(x)
         return x
 
-
 model = ConvNet().to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate) # Stavolta usa SGD, non so perché non ADAM
 criterion = nn.MSELoss()
@@ -127,13 +99,6 @@ def evaluates():
             cont +=1
         print(f'Mean Squared Error {loss/cont:.8f}')
 
-#writer.add_graph(model, example_data)
-#writer.close()
-#sys.exit()
-n_total_steps = len(train_loader)
-
-running_loss = 0.0
-print("funziona")
 for epoch in range(num_epochs):
     evaluates()
     for i, (images, labels) in enumerate(train_loader):
@@ -145,11 +110,9 @@ for epoch in range(num_epochs):
         optimizer.step()
 
         # Print the progress of training
-        running_loss = loss.item()
         if(i+1) % 10 == 0:
              print(f'Epoch {epoch+1}/{num_epochs}, Step [{i+1}/{len(train_loader)}], Loss: {loss.item():.4f}')
-             writer.add_scalar('training loss', running_loss / 100, epoch * n_total_steps + i)
-             running_loss = 0
+
 print('Finished Training')
 evaluates()
 
