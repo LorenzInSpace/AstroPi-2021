@@ -1,5 +1,5 @@
-# this section of code resize sample photo captured on 19/4/15 to 2000x1500
-# mantaining its metadata it then generate a csv file containg information
+# this section of code resizes sample photos captured on 19/4/15 to 2000x1500
+# mantaining the metadata, it then generates a csv file containg information
 # to be used in google earth engine
 """
 from PIL import Image
@@ -78,7 +78,7 @@ for i in range(1000,1340):
 """
 
 
-
+# This code creates a csv file from the data collected in orbit to be used in google earth engine
 
 """
 import csv
@@ -99,6 +99,10 @@ with open('data_clean.csv', mode='w') as csv_file:
     for r in coordinates:
         writer.writerow({'Photo': f'{r[0]}', 'Longitude': f'{r[1]}', 'Latitude': f'{r[2]}'})
 """
+
+# This code cleans the csv recieved from earth engine from null records or records associated with 
+# unusable images, found by hand and collected in the two lists below.
+
 # Fully or almost fully black images captured on 21/4/21
 bad = [114, 117, 119, 120, 126, 127, 128, 129, 133, 134,
        137, 138, 140, 143, 145, 147, 157, 161, 162, 163,
