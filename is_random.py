@@ -8,4 +8,5 @@ with open('label_data.csv', mode='r') as csv_file:
         current = float(row["mm_di_pioggia"])
         rain.append(current)
 avg = sum(rain)/len(rain)
+# Print the loss equivalent to guessing the average of all the data
 print(sum([(avg-p)**2 for p in rain])/len(rain))
