@@ -11,3 +11,4 @@ Our project consisted in developing a neural network able to determine how much 
 * [neuralNetwork.py](https://github.com/LorenzInSpace/AstroPi-2021/blob/main/neuralNetwork.py) : contains the actual neural network that does the magic
 * [salvapioggia.js](https://github.com/LorenzInSpace/AstroPi-2021/blob/main/salvapioggia.js) : google earth engine script to recover precipitation data
 * [utilityScript.py](https://github.com/LorenzInSpace/AstroPi-2021/blob/main/utilityScript.py) : collection of three python scripts to analyze csv and image files
+* [is_random.py](https://github.com/LorenzInSpace/AstroPi-2021/blob/main/is_random.py) : calculates the loss in the case every guess happened to be the average of the dataset values included in label_data.csv
